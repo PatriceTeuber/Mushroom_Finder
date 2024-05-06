@@ -5,9 +5,12 @@ import 'package:text_area/text_area.dart';
 class DialogHelper {
   final BuildContext context;
   final LatLng latLng;
-  final void Function(LatLng,String) add_Pin_with_Marker;
+  final void Function(LatLng, String) add_Pin_with_Marker;
 
-  DialogHelper({required this.context, required this.latLng, required this.add_Pin_with_Marker});
+  DialogHelper(
+      {required this.context,
+      required this.latLng,
+      required this.add_Pin_with_Marker});
 
   Future<void> showMyCreationDialog() async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -20,6 +23,7 @@ class DialogHelper {
         return AlertDialog(
           title: const Text('Pilz-Spot erstellen'),
           backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20.0)),
           ),
@@ -57,7 +61,7 @@ class DialogHelper {
                   Navigator.of(context).pop();
                 },
                 style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                    ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
                 child: const Text('Abbrechen',
                     style: TextStyle(
                       color: Colors.white,

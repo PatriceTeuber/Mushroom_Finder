@@ -8,7 +8,11 @@ import 'dialoghelper.dart';
 late MyApp myAppInstance;
 
 void main() {
-  runApp(MaterialApp(home: MyApp()));
+  runApp(MaterialApp(
+      theme: ThemeData(
+        useMaterial3: false,
+      ),
+      home: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
