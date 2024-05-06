@@ -74,7 +74,7 @@ class DialogHelper {
                 },
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.greenAccent),
-                child: const Text('Test Erstellen',
+                child: const Text('Erstellen',
                     style: TextStyle(
                       color: Colors.white,
                     )),
