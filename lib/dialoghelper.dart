@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:text_area/text_area.dart';
 
 class DialogHelper {
   final BuildContext context;
   final LatLng latLng;
-  final void Function(LatLng, String) add_Pin_with_Marker;
+  final void Function(LatLng, String, String) addPinWithLabelDialogHelper;
 
   DialogHelper(
       {required this.context,
       required this.latLng,
-      required this.add_Pin_with_Marker});
+      required this.addPinWithLabelDialogHelper});
 
   Future<void> showMyCreationDialog() async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     TextEditingController nameController = TextEditingController();
+    TextEditingController additionalInfoController = TextEditingController();
 
     return showDialog<void>(
       context: context,
@@ -25,10 +25,10 @@ class DialogHelper {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
           ),
-          actions: <Widget>[
-            Form(
+          content: SingleChildScrollView(
+            child: Form(
               key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +37,7 @@ class DialogHelper {
                       controller: nameController,
                       decoration: const InputDecoration(
                           icon: Icon(Icons.bookmark),
-                          hintText: 'Gib den Namen des Markes ein',
+                          hintText: 'Bitte gib den Namen des Markers ein',
                           labelText: 'Name *'),
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
@@ -46,15 +46,23 @@ class DialogHelper {
                         return null;
                       }),
                   const SizedBox(height: 20),
-                  const Text('Zusätzliche Informationen:'),
-                  const SizedBox(height: 20),
-                  const TextArea(
-                      borderRadius: 10,
-                      borderColor: const Color(0xFFCFD6FF),
-                      validation: false),
+                  TextFormField(
+                    controller: additionalInfoController,
+                    decoration: const InputDecoration(
+                        icon: Icon(Icons.book),
+                        hintText: 'Gib zusätzliche Informationen ein',
+                        labelText: 'Zusätzliche Informationen:'),
+                    minLines:
+                        1, // any number you need (It works as the rows for the textarea)
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                  ),
+                  const SizedBox(height: 20)
                 ],
               ),
             ),
+          ),
+          actions: <Widget>[
             Row(children: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -71,8 +79,8 @@ class DialogHelper {
               ElevatedButton(
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-                    String spotName = nameController.text;
-                    add_Pin_with_Marker(latLng, spotName);
+                    addPinWithLabelDialogHelper(latLng, nameController.text,
+                        additionalInfoController.text);
                     Navigator.of(context).pop();
                   }
                 },

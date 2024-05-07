@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:mushroom_finder/markerdata.dart';
 import 'appbar.dart';
 import 'actionbutton.dart';
 import 'dialoghelper.dart';
-
-late MyApp myAppInstance;
 
 void main() {
   runApp(MaterialApp(
@@ -24,16 +23,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final MapController mapController = MapController();
-
-  var customMarkers = <Marker>[];
-
-  var customLabels = <Marker>[];
-
-  @override
-  void initState() {
-    super.initState();
-    myAppInstance = this.widget;
-  }
+  var markerDataList = <MarkerData>[];
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +40,7 @@ class _MyAppState extends State<MyApp> {
               DialogHelper(
                       context: context,
                       latLng: latLng,
-                      add_Pin_with_Marker: add_Pin_with_Marker)
+                      addPinWithLabelDialogHelper: addCustomMarker)
                   .showMyCreationDialog();
             });
             setState(() {});
@@ -61,21 +51,39 @@ class _MyAppState extends State<MyApp> {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
           ),
-          MarkerLayer(
-            markers: customMarkers,
-          ),
-          MarkerLayer(
-            markers: customLabels,
-          ),
+          buildMarkerLayer(),
+          buildLabelLayer(),
         ],
       ),
       floatingActionButton: FloatingActionbutton(mapController: mapController),
     );
   }
 
-  void add_Pin_with_Marker(LatLng point, String spotName) {
-    customLabels.add(buildLabel(point, spotName));
-    customMarkers.add(buildPin(point));
+  Widget buildMarkerLayer() {
+    final markers = markerDataList.map((markerData) => markerData.pinMarker).toList();
+    return MarkerLayer(markers: markers);
+  }
+
+  Widget buildLabelLayer() {
+    final markers = markerDataList.map((markerData) => markerData.labelMarker).toList();
+    return MarkerLayer(markers: markers);
+  }
+
+  // Hinzufügen eines neuen Markers in die Liste
+  void addCustomMarker(LatLng point, String spotName, String spotInformation) {
+    final pinMarker = buildPin(point);
+    final labelMarker = buildLabel(point, spotName);
+
+    final markerData = MarkerData(
+      pinMarker: pinMarker,
+      labelMarker: labelMarker,
+      title: spotName,
+      additionalInformation: spotInformation
+    );
+
+    setState(() {
+      markerDataList.add(markerData);
+    });
   }
 
   // Erstellen von Pins auf der Karte
@@ -87,11 +95,8 @@ class _MyAppState extends State<MyApp> {
         child: IconButton(
           onPressed: () {
             setState(() {
-              customMarkers.removeWhere((marker) {
-                return marker.point == point;
-              });
-              customLabels.removeWhere((label) {
-                return label.point == point;
+              markerDataList.removeWhere((markerData) {
+                return markerData.pinMarker.point == point;
               });
             });
           },
@@ -100,6 +105,7 @@ class _MyAppState extends State<MyApp> {
           iconSize: 50,
         ),
       );
+
   // Erstellen von Text auf der Karte
   Marker buildLabel(LatLng point, String markerName) => Marker(
         point: point,
