@@ -40,10 +40,11 @@ class _MyAppState extends State<MyApp> {
               DialogHelper(
                       context: context,
                       latLng: latLng,
-                      addPinWithLabelDialogHelper: addCustomMarker)
+                      addPinWithLabelDialogHelper: addCustomMarker,
+                      removeCustomMarkerDialogHelper: removeCustomMarker,
+                      changeCustomMarkerDialogHelper: changeCustomMarker)
                   .showMyCreationDialog();
             });
-            setState(() {});
           },
         ),
         children: [
@@ -60,12 +61,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget buildMarkerLayer() {
-    final markers = markerDataList.map((markerData) => markerData.pinMarker).toList();
+    final markers =
+        markerDataList.map((markerData) => markerData.pinMarker).toList();
     return MarkerLayer(markers: markers);
   }
 
   Widget buildLabelLayer() {
-    final markers = markerDataList.map((markerData) => markerData.labelMarker).toList();
+    final markers =
+        markerDataList.map((markerData) => markerData.labelMarker).toList();
     return MarkerLayer(markers: markers);
   }
 
@@ -74,15 +77,35 @@ class _MyAppState extends State<MyApp> {
     final pinMarker = buildPin(point);
     final labelMarker = buildLabel(point, spotName);
 
-    final markerData = MarkerData(
-      pinMarker: pinMarker,
-      labelMarker: labelMarker,
-      title: spotName,
-      additionalInformation: spotInformation
-    );
+    final markerData =
+        MarkerData(pinMarker, labelMarker, spotName, spotInformation);
 
     setState(() {
       markerDataList.add(markerData);
+    });
+  }
+
+  void changeCustomMarker(
+      LatLng point, String newSpotName, String newSpotInformation) {
+    setState(() {
+      MarkerData? markerData = findMarkerData(point);
+      if (markerData != null) {
+        markerData.title = newSpotName;
+        markerData.additionalInformation = newSpotInformation;
+        markerData.labelMarker = buildLabel(point, newSpotName);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Marker-Datensatz wurde nicht gefunden.')),
+        );
+      }
+    });
+  }
+
+  void removeCustomMarker(LatLng point) {
+    setState(() {
+      markerDataList.removeWhere((markerData) {
+        return markerData.pinMarker.point == point;
+      });
     });
   }
 
@@ -95,9 +118,20 @@ class _MyAppState extends State<MyApp> {
         child: IconButton(
           onPressed: () {
             setState(() {
-              markerDataList.removeWhere((markerData) {
-                return markerData.pinMarker.point == point;
-              });
+              MarkerData? markerData = findMarkerData(point);
+              if (markerData != null) {
+                DialogHelper(
+                    context: context,
+                    latLng: point,
+                    addPinWithLabelDialogHelper: addCustomMarker,
+                    removeCustomMarkerDialogHelper: removeCustomMarker,
+                    changeCustomMarkerDialogHelper: changeCustomMarker)
+                    .showMyEditDialog(markerData.title, markerData.additionalInformation);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Marker-Datensatz wurde nicht gefunden.')),
+                );
+              }
             });
           },
           icon: const Icon(Icons.location_on),
@@ -125,4 +159,14 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       );
+
+  MarkerData? findMarkerData(LatLng point) {
+    for (var markerData in markerDataList) {
+      if (markerData.pinMarker.point == point) {
+        return markerData;
+      }
+    }
+    return null;
+  }
+
 }

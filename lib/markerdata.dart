@@ -1,15 +1,35 @@
 import 'package:flutter_map/flutter_map.dart';
 
 class MarkerData {
-  final Marker pinMarker;
-  final Marker labelMarker;
-  final String title;
-  final String additionalInformation;
+  Marker _pinMarker;
+  Marker _labelMarker;
+  String _title;
+  String _additionalInformation;
 
-  MarkerData({
-    required this.pinMarker,
-    required this.labelMarker,
-    required this.title,
-    required this.additionalInformation
-  });
+  MarkerData(this._pinMarker, this._labelMarker, this._title,
+      this._additionalInformation);
+
+  Marker get pinMarker => _pinMarker;
+
+  set pinMarker(Marker value) {
+    _pinMarker = value;
+  }
+
+  String get additionalInformation => _additionalInformation;
+
+  set additionalInformation(String value) {
+    _additionalInformation = value;
+  }
+
+  String get title => _title;
+
+  set title(String value) {
+    _title = value;
+  }
+
+  Marker get labelMarker => _labelMarker;
+
+  set labelMarker(Marker value) {
+    _labelMarker = value;
+  }
 }
