@@ -119,24 +119,8 @@ class _MyAppState extends State<MyApp> {
     );
 
     /// Hinzufügen der neuen MarkerDataModel-Instanz zur Datenbank
-    final insertedModel =
-        await AppDatabase.instance.createMarkerDataModel(newMarkerDataModel);
+    await AppDatabase.instance.createMarkerDataModel(newMarkerDataModel);
 
-    /// Erstellen des neuen MarkerData-Objektes aus dem gespeicherten Datensatz
-    /// und Hinzufügen zur temporären Liste der MarkerData-Objekte
-    /// alte Implementierung
-    /*
-      setState(() {
-        final pinMarker = buildPin(LatLng(insertedModel.latitude, insertedModel.longitude));
-        final labelMarker = buildLabel(LatLng(insertedModel.latitude, insertedModel.longitude), insertedModel.title);
-        markerDataList.add(
-            MarkerData(
-                pinMarker,
-                labelMarker,
-                insertedModel.title,
-                insertedModel.additionalInformation!)
-        );
-      });*/
     /// Neuladen aller Markerdaten, um die Anzeige auf der Karte zu aktualisieren
     loadMarkerData();
   }
