@@ -84,7 +84,7 @@ class _MyAppState extends State<MyApp> {
             setState(() {
               DialogHelper(
                       context: context,
-                      latLng: latLng,
+                      point: latLng,
                       addPinWithLabelDialogHelper: addCustomMarker,
                       removeCustomMarkerDialogHelper: removeCustomMarker,
                       changeCustomMarkerDialogHelper: changeCustomMarker)
@@ -225,7 +225,7 @@ class _MyAppState extends State<MyApp> {
               if (markerData != null) {
                 DialogHelper(
                         context: context,
-                        latLng: point,
+                        point: point,
                         addPinWithLabelDialogHelper: addCustomMarker,
                         removeCustomMarkerDialogHelper: removeCustomMarker,
                         changeCustomMarkerDialogHelper: changeCustomMarker)
@@ -264,7 +264,7 @@ class _MyAppState extends State<MyApp> {
       width: textPainter.width + 16,
 
       /// Breite des Containers entspricht der Breite des Textes plus Padding
-      height: textPainter.height + 8,
+      height: textPainter.height + 12,
 
       /// Höhe des Containers entspricht der Höhe des Textes plus Padding
       alignment: Alignment.bottomCenter,
