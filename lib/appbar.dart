@@ -8,7 +8,7 @@ class Appbar extends StatefulWidget implements PreferredSizeWidget {
   Appbar({required this.getCustomMarker, required this.changeMarkerColor});
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 16);
   @override
   State<Appbar> createState() => _AppbarState(getCustomMarker:getCustomMarker,changeMarkerColor:changeMarkerColor);
 }
@@ -24,12 +24,13 @@ class _AppbarState extends State<Appbar> {
     return AppBar(
       centerTitle: true,
       backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
-      title: Container(
-        width: MediaQuery.of(context).size.width * 0.90,
-        height: 60,
+      title: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: 50,
         child:SearchAnchor(
-            viewConstraints: BoxConstraints(
+            viewConstraints: const BoxConstraints(
               minHeight: kToolbarHeight,
               maxHeight: kToolbarHeight * 5,
             ),
@@ -90,7 +91,7 @@ class _AppbarState extends State<Appbar> {
               if (suggestionList.isEmpty) {
                 return [
                   ListTile(
-                    title: Center(
+                    title: const Center(
                       child: Text(
                         'Bisher keine Pilze markiert',
                         style: TextStyle(color: Colors.red, fontSize: 19),
