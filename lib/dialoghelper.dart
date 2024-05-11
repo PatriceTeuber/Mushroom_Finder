@@ -1,77 +1,22 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
 class DialogHelper {
   final BuildContext context;
-  final LatLng point;
-  //Funktionen, die im Dialog lediglich aufgerufen werden
+  final LatLng latLng;
   final void Function(LatLng, String, String) addPinWithLabelDialogHelper;
   final void Function(LatLng) removeCustomMarkerDialogHelper;
   final void Function(LatLng, String, String) changeCustomMarkerDialogHelper;
 
   DialogHelper({
     required this.context,
-    required this.point,
+    required this.latLng,
     required this.addPinWithLabelDialogHelper,
     required this.removeCustomMarkerDialogHelper,
     required this.changeCustomMarkerDialogHelper,
   });
-
-  //Festlegung von Farbwerten
-  final greenButton = Colors.green;
-  final redButton = Colors.redAccent;
-  final blackButton = Colors.black;
-  final backgroundColor = Colors.white;
-  static const Color textColor = Colors.white;
-
-  Future<bool?> showDeleteConfirmationDialog(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Marker löschen'),
-          content: const Text('Möchten Sie diesen Marker wirklich löschen?'),
-          backgroundColor: backgroundColor,
-          surfaceTintColor: backgroundColor,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(5.0))),
-          actions: <Widget>[
-            Row(children: <Widget>[
-              Expanded(
-                  child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                style:
-                    ElevatedButton.styleFrom(backgroundColor: redButton),
-                child: const Text('Ja',
-                    style: TextStyle(
-                      color: textColor,
-                    )),
-              )),
-              const SizedBox(width: 11),
-              Expanded(
-                  child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: greenButton),
-                child: const Text('Nein',
-                    style: TextStyle(
-                      color: textColor,
-                    )),
-              ))
-            ]),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> showMyEditDialog(
       String markerTitle, String markerAdditionalInformation) async {
@@ -88,8 +33,8 @@ class DialogHelper {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Pilz-Spot bearbeiten'),
-            backgroundColor: backgroundColor,
-            surfaceTintColor: backgroundColor,
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(5.0)),
             ),
@@ -130,55 +75,49 @@ class DialogHelper {
             ),
             actions: <Widget>[
               Row(children: <Widget>[
-                Expanded(
-                    child: ElevatedButton(
+                ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: redButton),
+                      backgroundColor: Colors.redAccent),
                   child: const Text('Abbrechen',
                       style: TextStyle(
-                        color: textColor,
+                        color: Colors.white,
                       )),
-                )),
-                const SizedBox(width: 11),
-                Expanded(
-                    child: ElevatedButton(
+                ),
+                const Spacer(),
+                ElevatedButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      changeCustomMarkerDialogHelper(point,
+                      changeCustomMarkerDialogHelper(latLng,
                           nameController.text, additionalInfoController.text);
                       Navigator.of(context).pop();
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: greenButton),
+                      backgroundColor: Colors.greenAccent),
                   child: const Text('Übernehmen',
                       style: TextStyle(
-                        color: textColor,
+                        color: Colors.white,
                       )),
-                ))
+                ),
               ]),
-              const Divider(height: 20, color: Colors.grey, thickness: 1),
+              const Divider(height: 20, color: Colors.grey),
               Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Expanded(
                         child: ElevatedButton(
-                      onPressed: () async {
-                        bool? deleteConfirmed =
-                            await showDeleteConfirmationDialog(context);
-                        if (deleteConfirmed != null && deleteConfirmed) {
-                          removeCustomMarkerDialogHelper(point);
-                          Navigator.of(context).pop();
-                        }
+                      onPressed: () {
+                        removeCustomMarkerDialogHelper(latLng);
+                        Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: blackButton),
+                          backgroundColor: Colors.black),
                       child: const Text('Löschen',
                           style: TextStyle(
-                            color: textColor,
+                            color: Colors.white,
                           )),
                     ))
                   ])
@@ -187,7 +126,7 @@ class DialogHelper {
         });
   }
 
-  Future<void> showMyCreationDialog() {
+  Future<void> showMyCreationDialog() async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     TextEditingController nameController = TextEditingController();
     TextEditingController additionalInfoController = TextEditingController();
@@ -198,8 +137,8 @@ class DialogHelper {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Pilz-Spot erstellen'),
-          backgroundColor: backgroundColor,
-          surfaceTintColor: backgroundColor,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
           ),
@@ -240,35 +179,33 @@ class DialogHelper {
           ),
           actions: <Widget>[
             Row(children: <Widget>[
-              Expanded(
-                  child: ElevatedButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 style:
-                    ElevatedButton.styleFrom(backgroundColor: redButton),
+                    ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
                 child: const Text('Abbrechen',
                     style: TextStyle(
-                      color: textColor,
+                      color: Colors.white,
                     )),
-              )),
-              const SizedBox(width: 11),
-              Expanded(
-                  child: ElevatedButton(
+              ),
+              const Spacer(),
+              ElevatedButton(
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-                    addPinWithLabelDialogHelper(point, nameController.text,
+                    addPinWithLabelDialogHelper(latLng, nameController.text,
                         additionalInfoController.text);
                     Navigator.of(context).pop();
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: greenButton),
+                    backgroundColor: Colors.greenAccent),
                 child: const Text('Erstellen',
                     style: TextStyle(
-                      color: textColor,
+                      color: Colors.white,
                     )),
-              ))
+              ),
             ])
           ],
         );

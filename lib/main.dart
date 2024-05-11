@@ -56,12 +56,25 @@ class _MyAppState extends State<MyApp> {
       }).toList();
     });
   }
+  List<MarkerData> getCustomMarker() {
+      return markerDataList;
+    }
+
+    void changeMarkerColor(String target_title, Color c){
+      for (var obj in markerDataList) {
+        if (obj.title == target_title) {
+          setState(() {
+            obj.pinMarker = buildPin(obj.pinMarker.point,c);
+          });
+        }
+      }
+    }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: Appbar(),
+      appBar: Appbar(getCustomMarker: getCustomMarker,changeMarkerColor: changeMarkerColor),
       body: FlutterMap(
         mapController: mapController,
         options: MapOptions(
@@ -71,7 +84,7 @@ class _MyAppState extends State<MyApp> {
             setState(() {
               DialogHelper(
                       context: context,
-                      point: latLng,
+                      latLng: latLng,
                       addPinWithLabelDialogHelper: addCustomMarker,
                       removeCustomMarkerDialogHelper: removeCustomMarker,
                       changeCustomMarkerDialogHelper: changeCustomMarker)
@@ -200,7 +213,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   /// Erstellen von Pins auf der Karte
-  Marker buildPin(LatLng point) => Marker(
+  Marker buildPin(LatLng point,[Color PinColor = Colors.black]) => Marker(
         point: point,
         width: 60,
         height: 60,
@@ -212,7 +225,7 @@ class _MyAppState extends State<MyApp> {
               if (markerData != null) {
                 DialogHelper(
                         context: context,
-                        point: point,
+                        latLng: point,
                         addPinWithLabelDialogHelper: addCustomMarker,
                         removeCustomMarkerDialogHelper: removeCustomMarker,
                         changeCustomMarkerDialogHelper: changeCustomMarker)
@@ -227,7 +240,7 @@ class _MyAppState extends State<MyApp> {
             });
           },
           icon: const Icon(Icons.location_on),
-          color: Colors.black,
+          color: PinColor,
           iconSize: 50,
         ),
       );
