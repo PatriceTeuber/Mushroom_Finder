@@ -29,6 +29,8 @@ dependencies:
   latlong2: ^0.9.1
   flutter_map_cancellable_tile_provider: ^1.0.0-preview
   text_area: ^0.0.3
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
