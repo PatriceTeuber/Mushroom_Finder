@@ -1,6 +1,6 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mushroom_finder/pointdata/pointdata.dart';
 import 'appbar.dart';
@@ -24,6 +24,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final MapController mapController = MapController();
   late var pointDataList = <PointData>[];
+  bool _hasConnection = true;
 
   @override
   void initState() {
@@ -37,6 +38,13 @@ class _MyAppState extends State<MyApp> {
 
     /// Schließen der Datenbank, wenn die App beendet wird
     AppDatabase.instance.close();
+  }
+
+  Future<void> checkConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    setState(() {
+      _hasConnection = connectivityResult != ConnectivityResult.none;
+    });
   }
 
   Future<void> loadPointData() async {
