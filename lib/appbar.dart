@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'markerdata/markerdata.dart';
+import 'package:mushroom_finder/pointdata/pointdata.dart';
 
 class Appbar extends StatefulWidget implements PreferredSizeWidget {
-  final List<MarkerData> Function() getCustomMarker;
+  final List<PointData> Function() getCustomMarker;
   final void Function(String target_title, Color c) changeMarkerColor;
 
   Appbar({required this.getCustomMarker, required this.changeMarkerColor});
@@ -14,7 +14,7 @@ class Appbar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppbarState extends State<Appbar> {
-  final List<MarkerData> Function() getCustomMarker;
+  final List<PointData> Function() getCustomMarker;
   final void Function(String target_title, Color c) changeMarkerColor;
 
   _AppbarState({required this.getCustomMarker,required this.changeMarkerColor});
@@ -80,12 +80,12 @@ class _AppbarState extends State<Appbar> {
             },
           suggestionsBuilder:
               (BuildContext context, SearchController controller) {
-              final List<MarkerData> data = getCustomMarker();
-              final List<String> titles = data.map((markerData) => markerData.title).toSet().toList();
+              final List<PointData> data = getCustomMarker();
+              final List<String> titles = data.map((pointData) => pointData.title).toSet().toList();
               final String text = controller.value.text.toLowerCase();
 
               final List<String> suggestionList = text.isEmpty
-               ? titles // Wenn die Suchleiste leer ist, werden alle MarkerData-Objekte angezeigt
+               ? titles /// Wenn die Suchleiste leer ist, werden alle PointData-Objekte angezeigt
               : titles.where((title) => title.toLowerCase().contains(text)).toList();
 
               if (suggestionList.isEmpty) {

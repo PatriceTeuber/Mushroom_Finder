@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:mushroom_finder/markerdata/markerdata.dart';
+import 'package:mushroom_finder/pointdata/pointdata.dart';
 import 'appbar.dart';
 import 'actionbutton.dart';
 import 'database/app_database.dart';
-import 'database/markerDataModel.dart';
+import 'database/pointDataModel.dart';
 import 'dialoghelper.dart';
 
 void main() {
@@ -22,12 +22,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final MapController mapController = MapController();
-  late var markerDataList = <MarkerData>[];
+  late var pointDataList = <PointData>[];
 
   @override
   void initState() {
     super.initState();
-    loadMarkerData();
+    loadPointData();
   }
 
   @override
@@ -38,11 +38,11 @@ class _MyAppState extends State<MyApp> {
     AppDatabase.instance.close();
   }
 
-  Future<void> loadMarkerData() async {
-    final markerDataModels =
-        await AppDatabase.instance.readAllMarkerDataModels();
+  Future<void> loadPointData() async {
+    final pointDataModels =
+        await AppDatabase.instance.readAllPointDataModels();
     setState(() {
-      markerDataList = markerDataModels.map((model) {
+      pointDataList = pointDataModels.map((model) {
         final pinMarker = model != null
             ? buildPin(LatLng(model.latitude, model.longitude))
             : null;
@@ -51,17 +51,17 @@ class _MyAppState extends State<MyApp> {
             : null;
         final additionalInformation =
             model != null ? model.additionalInformation : "";
-        return MarkerData(
+        return PointData(
             pinMarker!, labelMarker!, model!.title, additionalInformation!);
       }).toList();
     });
   }
-  List<MarkerData> getCustomMarker() {
-      return markerDataList;
+  List<PointData> getCustomMarker() {
+      return pointDataList;
     }
 
     void changeMarkerColor(String target_title, Color c){
-      for (var obj in markerDataList) {
+      for (var obj in pointDataList) {
         if (obj.title == target_title) {
           setState(() {
             obj.pinMarker = buildPin(obj.pinMarker.point,c);
@@ -105,17 +105,17 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  /// Zusammenfassen aller Pin-Marker aus MarkerData-Objekten in einem MarkerLayer
+  /// Zusammenfassen aller Pin-Marker aus PointData-Objekten in einem MarkerLayer
   Widget buildMarkerLayer() {
     final markers =
-        markerDataList.map((markerData) => markerData.pinMarker).toList();
+    pointDataList.map((pointData) => pointData.pinMarker).toList();
     return MarkerLayer(markers: markers);
   }
 
-  /// Zusammenfassen aller Label-Marker aus MarkerData-Objekten in einem MarkerLayer
+  /// Zusammenfassen aller Label-Marker aus PointData-Objekten in einem MarkerLayer
   Widget buildLabelLayer() {
     final markers =
-        markerDataList.map((markerData) => markerData.labelMarker).toList();
+    pointDataList.map((pointData) => pointData.labelMarker).toList();
     return MarkerLayer(markers: markers);
   }
 
@@ -123,19 +123,19 @@ class _MyAppState extends State<MyApp> {
   /// Aktualisierung des Screens mit dem neuen hinzugefügten Marker
   void addCustomMarker(
       LatLng point, String spotName, String spotInformation) async {
-    /// Erstellung eines Objektes zur Datenhaltung eines MarkerData-Objektes
-    final newMarkerDataModel = MarkerDataModel(
+    /// Erstellung eines Objektes zur Datenhaltung eines PointData-Objektes
+    final newPointDataModel = PointDataModel(
       latitude: point.latitude,
       longitude: point.longitude,
       title: spotName,
       additionalInformation: spotInformation,
     );
 
-    /// Hinzufügen der neuen MarkerDataModel-Instanz zur Datenbank
-    await AppDatabase.instance.createMarkerDataModel(newMarkerDataModel);
+    /// Hinzufügen der neuen PointDataModel-Instanz zur Datenbank
+    await AppDatabase.instance.createPointDataModel(newPointDataModel);
 
     /// Neuladen aller Markerdaten, um die Anzeige auf der Karte zu aktualisieren
-    loadMarkerData();
+    loadPointData();
   }
 
   /// Aktualisieren eines bestehenden Markers in der Datenbank
@@ -143,29 +143,29 @@ class _MyAppState extends State<MyApp> {
   void changeCustomMarker(
       LatLng point, String newSpotName, String newSpotInformation) async {
     try {
-      /// Versuche, die MarkerDataModel-Instanz für die angegebenen Koordinaten zu lesen
-      final existingMarkerDataModel = await AppDatabase.instance
-          .readMarkerDataModelByLatLng(point.latitude, point.longitude);
+      /// Versuche, die PointDataModel-Instanz für die angegebenen Koordinaten zu lesen
+      final existingPointDataModel = await AppDatabase.instance
+          .readPointDataModelByLatLng(point.latitude, point.longitude);
 
-      /// Wenn eine MarkerDataModel-Instanz gefunden wurde
-      if (existingMarkerDataModel != null) {
-        /// Erstellen neuer Instanz der MarkerDataModel-Klasse mit den aktualisierten Daten
-        final updatedMarkerDataModel = MarkerDataModel(
-          id: existingMarkerDataModel.id,
-          latitude: existingMarkerDataModel.latitude,
-          longitude: existingMarkerDataModel.longitude,
+      /// Wenn eine PointDataModel-Instanz gefunden wurde
+      if (existingPointDataModel != null) {
+        /// Erstellen neuer Instanz der PointDataModel-Klasse mit den aktualisierten Daten
+        final updatedPointDataModel = PointDataModel(
+          id: existingPointDataModel.id,
+          latitude: existingPointDataModel.latitude,
+          longitude: existingPointDataModel.longitude,
           title: newSpotName,
           additionalInformation: newSpotInformation,
         );
 
-        /// Aktualisieren der MarkerDataModel-Instanz in der Datenbank
+        /// Aktualisieren der PointDataModel-Instanz in der Datenbank
         await AppDatabase.instance
-            .updateMarkerDataModel(updatedMarkerDataModel);
+            .updatePointDataModel(updatedPointDataModel);
 
         /// Neuladen aller Markerdaten, um die Anzeige auf der Karte zu aktualisieren
-        loadMarkerData();
+        loadPointData();
       } else {
-        /// Wenn keine MarkerDataModel-Instanz für die angegebenen Koordinaten gefunden wurde,
+        /// Wenn keine PointDataModel-Instanz für die angegebenen Koordinaten gefunden wurde,
         /// zeige eine Fehlermeldung an
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -181,19 +181,19 @@ class _MyAppState extends State<MyApp> {
   }
 
   void removeCustomMarker(LatLng point) async {
-    /// Versuche, die MarkerDataModel-Instanz für die angegebenen Koordinaten zu lesen
-    final existingMarkerDataModel = await AppDatabase.instance
-        .readMarkerDataModelByLatLng(point.latitude, point.longitude);
+    /// Versuche, die PointDataModel-Instanz für die angegebenen Koordinaten zu lesen
+    final existingPointDataModel = await AppDatabase.instance
+        .readPointDataModelByLatLng(point.latitude, point.longitude);
 
-    if (existingMarkerDataModel != null) {
-      /// Löschen der MarkerDataModel-Instanz in der Datenbank
+    if (existingPointDataModel != null) {
+      /// Löschen der PointDataModel-Instanz in der Datenbank
       await AppDatabase.instance
-          .deleteMarkerDataModel(existingMarkerDataModel.id!);
+          .deletePointDataModel(existingPointDataModel.id!);
 
       /// Neuladen aller Markerdaten, um die Anzeige auf der Karte zu aktualisieren
-      loadMarkerData();
+      loadPointData();
     } else {
-      /// Wenn keine MarkerDataModel-Instanz für die angegebenen Koordinaten gefunden wurde,
+      /// Wenn keine PointDataModel-Instanz für die angegebenen Koordinaten gefunden wurde,
       /// zeige eine Fehlermeldung an
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Marker-Datensatz wurde nicht gefunden.')),
@@ -201,12 +201,12 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// Suchen eines MarkerData-Objektes in der temporären Liste von MarkerData-Objekten
+  /// Suchen eines PointData-Objektes in der temporären Liste von PointData-Objekten
   /// an bestimmten Punkt
-  MarkerData? findMarkerData(LatLng point) {
-    for (var markerData in markerDataList) {
-      if (markerData.pinMarker.point == point) {
-        return markerData;
+  PointData? findPointData(LatLng point) {
+    for (var pointData in pointDataList) {
+      if (pointData.pinMarker.point == point) {
+        return pointData;
       }
     }
     return null;
@@ -221,8 +221,8 @@ class _MyAppState extends State<MyApp> {
         child: IconButton(
           onPressed: () {
             setState(() {
-              MarkerData? markerData = findMarkerData(point);
-              if (markerData != null) {
+              PointData? pointData = findPointData(point);
+              if (pointData != null) {
                 DialogHelper(
                         context: context,
                         point: point,
@@ -230,7 +230,7 @@ class _MyAppState extends State<MyApp> {
                         removeCustomMarkerDialogHelper: removeCustomMarker,
                         changeCustomMarkerDialogHelper: changeCustomMarker)
                     .showMyEditDialog(
-                        markerData.title, markerData.additionalInformation);
+                    pointData.title, pointData.additionalInformation);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(

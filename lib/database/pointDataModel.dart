@@ -1,4 +1,4 @@
-const String tableName = "marker_data_model";
+const String tableName = "point_data_model";
 
 const String idField = "_id";
 const String latitudeField = "latitude";
@@ -6,7 +6,7 @@ const String longitudeField = "longitude";
 const String titleField = "title";
 const String additionalInformationField = "additional_information";
 
-const List<String> markerDataModelColumns = [
+const List<String> pointDataModelColumns = [
   idField,
   latitudeField,
   longitudeField,
@@ -19,21 +19,21 @@ const String doubleType = "DOUBLE NOT NULL UNIQUE";
 const String textTypeNullable = "TEXT";
 const String textType = "TEXT NOT NULL";
 
-class MarkerDataModel {
+class PointDataModel {
   final int? id;
   final double latitude;
   final double longitude;
   final String title;
   final String? additionalInformation;
 
-  MarkerDataModel(
+  PointDataModel(
       {this.id,
       required this.latitude,
       required this.longitude,
       required this.title,
       this.additionalInformation});
 
-  static MarkerDataModel fromJson(Map<String, dynamic> json) => MarkerDataModel(
+  static PointDataModel fromJson(Map<String, dynamic> json) => PointDataModel(
         id: json[idField] as int?,
         latitude: json[latitudeField] as double,
         longitude: json[longitudeField] as double,
@@ -49,13 +49,13 @@ class MarkerDataModel {
         additionalInformationField: additionalInformation,
       };
 
-  MarkerDataModel copyWith({
+  PointDataModel copyWith({
     int? id,
     double? latitude,
     double? longitude,
     String? title,
     String? additionalInformation,
-  }) => MarkerDataModel(
+  }) => PointDataModel(
       id: id ?? this.id,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,

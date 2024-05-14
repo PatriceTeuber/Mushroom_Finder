@@ -1,8 +1,8 @@
-import 'package:mushroom_finder/database/markerDataModel.dart';
+import 'package:mushroom_finder/database/pointDataModel.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-const String fileName = "marker_date_model_database.db";
+const String fileName = "point_date_model_database.db";
 
 class AppDatabase {
   AppDatabase._init();
@@ -35,19 +35,19 @@ class AppDatabase {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
-  Future<MarkerDataModel> createMarkerDataModel(MarkerDataModel markerDataModel) async {
+  Future<PointDataModel> createPointDataModel(PointDataModel pointDataModel) async {
     final db = await instance.database;
-    final id = await db.insert(tableName, markerDataModel.toJson());
-    return markerDataModel.copyWith(id: id);
+    final id = await db.insert(tableName, pointDataModel.toJson());
+    return pointDataModel.copyWith(id: id);
   }
 
-  Future<List<MarkerDataModel?>> readAllMarkerDataModels() async {
+  Future<List<PointDataModel?>> readAllPointDataModels() async {
     final db = await instance.database;
     final result = await db.query(tableName); //Eventuell OrderBY hinzufügen
-    return result.map((json) => MarkerDataModel.fromJson(json)).toList();
+    return result.map((json) => PointDataModel.fromJson(json)).toList();
   }
 
-  Future<MarkerDataModel?> readMarkerDataModelByLatLng(double latitude, double longitude) async {
+  Future<PointDataModel?> readPointDataModelByLatLng(double latitude, double longitude) async {
     final db = await instance.database;
     final result = await db.query(
       tableName,
@@ -56,8 +56,8 @@ class AppDatabase {
     );
     if (result.isNotEmpty) {
       /// Wenn ein Datensatz mit den angegebenen Koordinaten gefunden wurde,
-      /// konvertiere ihn in ein MarkerDataModel-Objekt und gib es zurück
-      return MarkerDataModel.fromJson(result.first);
+      /// konvertiere ihn in ein PointDataModel-Objekt und gib es zurück
+      return PointDataModel.fromJson(result.first);
     } else {
       /// Wenn kein Datensatz mit den angegebenen Koordinaten gefunden wurde,
       /// gib null zurück
@@ -70,17 +70,17 @@ class AppDatabase {
     return db.close();
   }
 
-  Future<int> updateMarkerDataModel(MarkerDataModel markerDataModel) async {
+  Future<int> updatePointDataModel(PointDataModel pointDataModel) async {
     final db = await instance.database;
     return await db.update(
       tableName,
-      markerDataModel.toJson(),
+      pointDataModel.toJson(),
       where: "$idField = ?",
-      whereArgs: [markerDataModel.id],
+      whereArgs: [pointDataModel.id],
     );
   }
 
-  Future<int> deleteMarkerDataModel(int id) async {
+  Future<int> deletePointDataModel(int id) async {
     final db = await instance.database;
     return await db.delete(
       tableName,

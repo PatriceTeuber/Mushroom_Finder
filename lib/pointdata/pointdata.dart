@@ -1,12 +1,12 @@
 import 'package:flutter_map/flutter_map.dart';
 
-class MarkerData {
+class PointData {
   Marker _pinMarker;
   Marker _labelMarker;
   String _title;
   String _additionalInformation;
 
-  MarkerData(this._pinMarker, this._labelMarker, this._title,
+  PointData(this._pinMarker, this._labelMarker, this._title,
       this._additionalInformation);
 
   Marker get pinMarker => _pinMarker;
