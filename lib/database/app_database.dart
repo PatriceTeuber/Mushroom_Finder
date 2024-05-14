@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:mushroom_finder/database/pointDataModel.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 const String fileName = "point_date_model_database.db";
 
@@ -30,8 +32,14 @@ class AppDatabase {
   }
 
   Future<Database> _initializeDB(String fileName) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, fileName);
+    final String path;
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWeb;
+      path = 'my_web_web.db';
+    } else {
+      final dbPath = await getDatabasesPath();
+      path = join(dbPath, fileName);
+    }
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
