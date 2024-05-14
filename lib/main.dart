@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mushroom_finder/pointdata/pointdata.dart';
 import 'appbar.dart';
@@ -22,11 +23,71 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   final MapController mapController = MapController();
   late var pointDataList = <PointData>[];
   final List<String> TitelstoSearch = [];
+
   bool _hasConnection = true;
+
+  /// Animation Konstante
+  static const _startedId = 'AnimatedMapController#MoveStarted';
+  static const _inProgressId = 'AnimatedMapController#MoveInProgress';
+  static const _finishedId = 'AnimatedMapController#MoveFinished';
+
+  void _animatedMapMove(LatLng destLocation, double destZoom) {
+    // Create some tweens. These serve to split up the transition from one location to another.
+    // In our case, we want to split the transition be<tween> our current map center and the destination.
+    final camera = mapController.camera;
+    final latTween = Tween<double>(
+        begin: camera.center.latitude, end: destLocation.latitude);
+    final lngTween = Tween<double>(
+        begin: camera.center.longitude, end: destLocation.longitude);
+    final zoomTween = Tween<double>(begin: camera.zoom, end: destZoom);
+
+    // Create a animation controller that has a duration and a TickerProvider.
+    final controller = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    // The animation determines what path the animation will take. You can try different Curves values, although I found
+    // fastOutSlowIn to be my favorite.
+    final Animation<double> animation =
+    CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+
+    // Note this method of encoding the target destination is a workaround.
+    // When proper animated movement is supported (see #1263) we should be able
+    // to detect an appropriate animated movement event which contains the
+    // target zoom/center.
+    final startIdWithTarget =
+        '$_startedId#${destLocation.latitude},${destLocation.longitude},$destZoom';
+    bool hasTriggeredMove = false;
+
+    controller.addListener(() {
+      final String id;
+      if (animation.value == 1.0) {
+        id = _finishedId;
+      } else if (!hasTriggeredMove) {
+        id = startIdWithTarget;
+      } else {
+        id = _inProgressId;
+      }
+
+      hasTriggeredMove |= mapController.move(
+        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+        zoomTween.evaluate(animation),
+        id: id,
+      );
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        controller.dispose();
+      } else if (status == AnimationStatus.dismissed) {
+        controller.dispose();
+      }
+    });
+
+    controller.forward();
+  }
 
   @override
   void initState() {
@@ -82,12 +143,33 @@ class _MyAppState extends State<MyApp> {
       }
     }
 
-  void CreateSearch(String title) {
+  void createSearch(String title) {
     TitelstoSearch.add(title);
     loadPointData();
+    List<PointData> filteredPointDataList = [];
+    for (PointData pointData in pointDataList) {
+      if (pointData.title == title) {
+        filteredPointDataList.add(pointData);
+      }
+    }
+    if (filteredPointDataList.isEmpty) {
+      /// Fehlerzustand
+    } else if (filteredPointDataList.length > 1) { /// Mehrere Marker mit selben Namen vorhanden
+      var PointEntries = <LatLng>[];
+      for (PointData pointData in filteredPointDataList) {
+        PointEntries.add(pointData.pinMarker.point);
+      }
+      final bounds = LatLngBounds.fromPoints(PointEntries);
+      final constrained = CameraFit.bounds(
+        bounds: bounds,
+      ).fit(mapController.camera);
+      _animatedMapMove(constrained.center, constrained.zoom -1);
+    } else { /// nur ein Marker mit dem selben Namen vorhanden
+      _animatedMapMove(filteredPointDataList.first.pinMarker.point, mapController.camera.zoom + 1);
+    }
   }
 
-  void DeleteSearch() {
+  void deleteSearch() {
     TitelstoSearch.clear();
     loadPointData();
   }
@@ -96,7 +178,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: Appbar(getCustomMarker: getCustomMarker,changeMarkerColor: changeMarkerColor,CreateSearch:CreateSearch, DeleteSearch:DeleteSearch),
+      appBar: Appbar(getCustomMarker: getCustomMarker,changeMarkerColor: changeMarkerColor,CreateSearch:createSearch, DeleteSearch:deleteSearch),
       body: FlutterMap(
         mapController: mapController,
         options: MapOptions(
@@ -118,6 +200,7 @@ class _MyAppState extends State<MyApp> {
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
+            tileProvider: CancellableNetworkTileProvider(),
           ),
           buildMarkerLayer(),
           buildLabelLayer(),
