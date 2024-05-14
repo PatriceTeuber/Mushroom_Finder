@@ -11,7 +11,8 @@ import 'dialoghelper.dart';
 
 void main() {
   /// Ausführen der App
-  runApp(const MaterialApp(home: MyApp()));
+  runApp(const MaterialApp(
+      home: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -24,6 +25,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final MapController mapController = MapController();
   late var pointDataList = <PointData>[];
+  final List<String> TitelstoSearch = [];
   bool _hasConnection = true;
 
   @override
@@ -52,8 +54,9 @@ class _MyAppState extends State<MyApp> {
         await AppDatabase.instance.readAllPointDataModels();
     setState(() {
       pointDataList = pointDataModels.map((model) {
+        final color = TitelstoSearch.contains(model!.title) ? Colors.green : Colors.black;
         final pinMarker = model != null
-            ? buildPin(LatLng(model.latitude, model.longitude))
+            ? buildPin(LatLng(model.latitude, model.longitude),color)
             : null;
         final labelMarker = model != null
             ? buildLabel(LatLng(model.latitude, model.longitude), model.title)
@@ -79,11 +82,21 @@ class _MyAppState extends State<MyApp> {
       }
     }
 
+  void CreateSearch(String title) {
+    TitelstoSearch.add(title);
+    loadPointData();
+  }
+
+  void DeleteSearch() {
+    TitelstoSearch.clear();
+    loadPointData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: Appbar(getCustomMarker: getCustomMarker,changeMarkerColor: changeMarkerColor),
+      appBar: Appbar(getCustomMarker: getCustomMarker,changeMarkerColor: changeMarkerColor,CreateSearch:CreateSearch, DeleteSearch:DeleteSearch),
       body: FlutterMap(
         mapController: mapController,
         options: MapOptions(

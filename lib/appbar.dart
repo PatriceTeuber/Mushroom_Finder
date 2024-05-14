@@ -4,20 +4,25 @@ import 'package:mushroom_finder/pointdata/pointdata.dart';
 class Appbar extends StatefulWidget implements PreferredSizeWidget {
   final List<PointData> Function() getCustomMarker;
   final void Function(String target_title, Color c) changeMarkerColor;
+  final void Function(String title) CreateSearch;
+  final void Function() DeleteSearch;
 
-  Appbar({required this.getCustomMarker, required this.changeMarkerColor});
+  Appbar({required this.getCustomMarker, required this.changeMarkerColor, required this.CreateSearch,required this.DeleteSearch});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 16);
   @override
-  State<Appbar> createState() => _AppbarState(getCustomMarker:getCustomMarker,changeMarkerColor:changeMarkerColor);
+  State<Appbar> createState() => _AppbarState(getCustomMarker:getCustomMarker,changeMarkerColor:changeMarkerColor,CreateSearch:CreateSearch, DeleteSearch:DeleteSearch);
 }
 
 class _AppbarState extends State<Appbar> {
   final List<PointData> Function() getCustomMarker;
   final void Function(String target_title, Color c) changeMarkerColor;
+  final void Function(String title) CreateSearch;
+  final void Function() DeleteSearch;
+  SearchController controller = SearchController();
 
-  _AppbarState({required this.getCustomMarker,required this.changeMarkerColor});
+  _AppbarState({required this.getCustomMarker,required this.changeMarkerColor,required this.CreateSearch,required this.DeleteSearch});
 
   @override
   Widget build(BuildContext context) {
@@ -34,18 +39,23 @@ class _AppbarState extends State<Appbar> {
               minHeight: kToolbarHeight,
               maxHeight: kToolbarHeight * 5,
             ),
+            //headerTextStyle: const TextStyle(color: Colors.black,fontSize: 19),
             viewHintText: 'Suche nach Pilzen ...',
             viewOnSubmitted:(String title){
-              changeMarkerColor(title, Colors.green);
+              CreateSearch(title);
+              controller.closeView(title);
             },
-            headerHintStyle: const TextStyle(color: Colors.grey),
+            //headerHintStyle: const TextStyle(color: Colors.black,fontSize: 19),
             isFullScreen: false,
-            builder: (BuildContext context, SearchController controller) {
+            builder: (BuildContext context, controller) {
               return SearchBar(
+                //textStyle:MaterialStateProperty.all(
+                //    const TextStyle(color: Colors.black, fontSize: 19)
+                //),
                 hintText:'Suche nach Pilzen ...',
-                hintStyle:  MaterialStateProperty.all(
-                     const TextStyle(color: Colors.black, fontSize: 19)
-                ),
+                //hintStyle:  MaterialStateProperty.all(
+                //     const TextStyle(color: Colors.black, fontSize: 19)
+                //),
                 controller: controller,
                 padding: const MaterialStatePropertyAll<EdgeInsets>(
                     EdgeInsets.symmetric(horizontal: 16.0)),
@@ -70,7 +80,7 @@ class _AppbarState extends State<Appbar> {
                     icon: const Icon(Icons.clear),
                     color: Colors.black,
                     onPressed: () {
-                      changeMarkerColor(controller.value.text,Colors.black);
+                      DeleteSearch();
                       controller.clear();
                       FocusScope.of(context).unfocus();
                     },
@@ -94,7 +104,7 @@ class _AppbarState extends State<Appbar> {
                     title: const Center(
                       child: Text(
                         'Bisher keine Pilze markiert',
-                        style: TextStyle(color: Colors.red, fontSize: 19),
+                        //style: TextStyle(color: Colors.red, fontSize: 19),
                       ),
                     ),
                     onTap: () {},
@@ -105,13 +115,14 @@ class _AppbarState extends State<Appbar> {
                  List<ListTile> test = suggestionList.map((title) {
                   return ListTile(
                     title: Text(title),
-                    titleTextStyle: const TextStyle(color: Colors.black, fontSize: 19),
+                    //titleTextStyle: const TextStyle(color: Colors.black, fontSize: 19),
                     onTap: () {
                     setState(() {
                         controller.closeView(title);
                         FocusScope.of(context).unfocus();
                        });
-                    changeMarkerColor(title, Colors.green);
+                    CreateSearch(title);
+                    //changeMarkerColor(title, Colors.green);
                     },
                   );
                  }).toList();
