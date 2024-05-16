@@ -3,29 +3,38 @@ import 'package:mushroom_finder/pointdata/pointdata.dart';
 
 class Appbar extends StatefulWidget implements PreferredSizeWidget {
   final List<PointData> Function() getCustomMarker;
-  final void Function(String target_title, Color c) changeMarkerColor;
   final void Function(String title) CreateSearch;
   final void Function() DeleteSearch;
 
-  Appbar({required this.getCustomMarker, required this.changeMarkerColor, required this.CreateSearch,required this.DeleteSearch});
+  const Appbar({Key? key,required this.getCustomMarker, required this.CreateSearch,required this.DeleteSearch}): super(key: key);
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 16);
   @override
-  State<Appbar> createState() => _AppbarState(getCustomMarker:getCustomMarker,changeMarkerColor:changeMarkerColor,CreateSearch:CreateSearch, DeleteSearch:DeleteSearch);
+  State<Appbar> createState() => _AppbarState();
 }
 
 class _AppbarState extends State<Appbar> {
-  final List<PointData> Function() getCustomMarker;
-  final void Function(String target_title, Color c) changeMarkerColor;
-  final void Function(String title) CreateSearch;
-  final void Function() DeleteSearch;
-  SearchController controller = SearchController();
+  late List<PointData> Function() getCustomMarker;
+  late void Function(String title) CreateSearch;
+  late void Function() DeleteSearch;
+  late close controll;
 
-  _AppbarState({required this.getCustomMarker,required this.changeMarkerColor,required this.CreateSearch,required this.DeleteSearch});
+  @override
+  void initState() {
+    super.initState();
+     getCustomMarker = widget.getCustomMarker;
+     CreateSearch = widget.CreateSearch;
+     DeleteSearch = widget.DeleteSearch;
+  }
+
 
   @override
   Widget build(BuildContext context) {
+
+    final SearchController tempController = SearchController();
+    controll = close(controller:tempController);
+
     return AppBar(
       centerTitle: true,
       backgroundColor: Colors.transparent,
@@ -39,23 +48,24 @@ class _AppbarState extends State<Appbar> {
               minHeight: kToolbarHeight,
               maxHeight: kToolbarHeight * 5,
             ),
-            //headerTextStyle: const TextStyle(color: Colors.black,fontSize: 19),
+            headerTextStyle: const TextStyle(color: Colors.black,fontSize: 19),
             viewHintText: 'Suche nach Pilzen ...',
+            headerHintStyle: const TextStyle(color: Colors.grey,fontSize: 19),
             viewOnSubmitted:(String title){
               CreateSearch(title);
-              controller.closeView(title);
+              controll.CloseView(title);
             },
-            //headerHintStyle: const TextStyle(color: Colors.black,fontSize: 19),
             isFullScreen: false,
-            builder: (BuildContext context, controller) {
+            builder: (BuildContext context, SearchController controller) {
+              controll.controller = controller;
               return SearchBar(
-                //textStyle:MaterialStateProperty.all(
-                //    const TextStyle(color: Colors.black, fontSize: 19)
-                //),
+                textStyle:MaterialStateProperty.all(
+                    const TextStyle(color: Colors.black, fontSize: 19)
+                ),
                 hintText:'Suche nach Pilzen ...',
-                //hintStyle:  MaterialStateProperty.all(
-                //     const TextStyle(color: Colors.black, fontSize: 19)
-                //),
+                hintStyle:  MaterialStateProperty.all(
+                     const TextStyle(color: Colors.black, fontSize: 19)
+                ),
                 controller: controller,
                 padding: const MaterialStatePropertyAll<EdgeInsets>(
                     EdgeInsets.symmetric(horizontal: 16.0)),
@@ -65,10 +75,6 @@ class _AppbarState extends State<Appbar> {
                 onChanged: (_) {
                   controller.openView();
                 },
-                //leading: const Icon(
-                //  Icons.search,
-                //  color: Colors.black, // Make the search icon black
-                //),
                 leading:IconButton(
                     icon: const Icon(Icons.search),
                     color: Colors.black,
@@ -95,34 +101,31 @@ class _AppbarState extends State<Appbar> {
               final String text = controller.value.text.toLowerCase();
 
               final List<String> suggestionList = text.isEmpty
-               ? titles /// Wenn die Suchleiste leer ist, werden alle PointData-Objekte angezeigt
-              : titles.where((title) => title.toLowerCase().contains(text)).toList();
+               ? titles : titles.where((title) => title.toLowerCase().contains(text)).toList();
 
               if (suggestionList.isEmpty) {
                 return [
                   ListTile(
                     title: const Center(
                       child: Text(
-                        'Bisher keine Pilze markiert',
-                        //style: TextStyle(color: Colors.red, fontSize: 19),
+                        'keine Pilze',
+                        style: TextStyle(color: Colors.red, fontSize: 19),
                       ),
                     ),
                     onTap: () {},
                   )
                 ];
               }
-
-                 List<ListTile> test = suggestionList.map((title) {
+              List<ListTile> test = suggestionList.map((title) {
                   return ListTile(
                     title: Text(title),
-                    //titleTextStyle: const TextStyle(color: Colors.black, fontSize: 19),
+                    titleTextStyle: const TextStyle(color: Colors.black, fontSize: 19, inherit:false),
                     onTap: () {
                     setState(() {
                         controller.closeView(title);
                         FocusScope.of(context).unfocus();
                        });
                     CreateSearch(title);
-                    //changeMarkerColor(title, Colors.green);
                     },
                   );
                  }).toList();
@@ -131,5 +134,15 @@ class _AppbarState extends State<Appbar> {
         ),
       ),
     );
+  }
+}
+
+// Hack
+class close{
+  SearchController controller;
+  close({required this.controller});
+
+  void CloseView(String text){
+      controller.closeView(text);
   }
 }

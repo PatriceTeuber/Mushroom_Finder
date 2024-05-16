@@ -15,7 +15,7 @@ class FloatingActionbutton extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.black,
           onPressed: () {
-            mapController.move(mapController.center, mapController.zoom + 1);
+            mapController.move(mapController.camera.center, mapController.camera.zoom + 1);
           },
           child: const Icon(
             Icons.add,
@@ -26,7 +26,7 @@ class FloatingActionbutton extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.black,
           onPressed: () {
-            mapController.move(mapController.center, mapController.zoom - 1);
+            mapController.move(mapController.camera.center, mapController.camera.zoom - 1);
           },
           child: const Icon(
             Icons.remove,

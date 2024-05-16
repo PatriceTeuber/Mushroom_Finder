@@ -133,16 +133,6 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
       return pointDataList;
     }
 
-    void changeMarkerColor(String target_title, Color c){
-      for (var obj in pointDataList) {
-        if (obj.title == target_title) {
-          setState(() {
-            obj.pinMarker = buildPin(obj.pinMarker.point,c);
-          });
-        }
-      }
-    }
-
   void createSearch(String title) {
     TitelstoSearch.add(title);
     loadPointData();
@@ -178,7 +168,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: Appbar(getCustomMarker: getCustomMarker,changeMarkerColor: changeMarkerColor,CreateSearch:createSearch, DeleteSearch:deleteSearch),
+      appBar: Appbar(getCustomMarker: getCustomMarker,CreateSearch:createSearch, DeleteSearch:deleteSearch),
       body: FlutterMap(
         mapController: mapController,
         options: MapOptions(
