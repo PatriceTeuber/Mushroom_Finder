@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'dialogs/creationdialog.dart';
+import 'dialogs/deleteconfimationdialog.dart';
+import 'dialogs/editdialog.dart';
+
 class DialogHelper {
   final BuildContext context;
   final LatLng point;
@@ -19,14 +23,57 @@ class DialogHelper {
   });
 
   /// Festlegung von optischen Einstellungen (Farbwerte, Borderradius, etc.)
-  final greenButton = Colors.green;
-  final redButton = Colors.redAccent;
-  final blackButton = Colors.black;
-  final backgroundColor = Colors.white;
+  static const greenButton = Colors.green;
+  static const redButton = Colors.redAccent;
+  static const blackButton = Colors.black;
+  static const backgroundColor = Colors.white;
   static const Color textColor = Colors.white;
 
-  final double buttonRadius = 5;
+  static const double buttonRadius = 5;
 
+  /// Dialoge anzeigen
+  void showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          DeleteConfirmationDialog(
+            onConfirmed: () {
+              removeCustomMarkerDialogHelper(point);
+            },
+          ),
+    );
+  }
+
+  void showEditDialog(String markerTitle, String markerAdditionalInformation) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          EditDialog(
+            markerTitle: markerTitle,
+            markerAdditionalInformation: markerAdditionalInformation,
+            onConfirmed: (name, additionalInfo) {
+              changeCustomMarkerDialogHelper(point, name, additionalInfo);
+            },
+          ),
+    );
+  }
+
+  void showCreationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          CreationDialog(
+            onConfirmed: (name, additionalInfo) {
+              addPinWithLabelDialogHelper(point, name, additionalInfo);
+            },
+          ),
+    );
+  }
+
+/*
   Future<bool?> showDeleteConfirmationDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,
@@ -43,46 +90,45 @@ class DialogHelper {
             Row(children: <Widget>[
               Expanded(
                   child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: redButton,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(buttonRadius),
-                  ),
-                ),
-                child: const Text('Ja',
-                    style: TextStyle(
-                      color: textColor,
-                    )),
-              )),
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: redButton,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(buttonRadius),
+                      ),
+                    ),
+                    child: const Text('Ja',
+                        style: TextStyle(
+                          color: textColor,
+                        )),
+                  )),
               const SizedBox(width: 11),
               Expanded(
                   child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: greenButton,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(buttonRadius),
-                  ),
-                ),
-                child: const Text('Nein',
-                    style: TextStyle(
-                      color: textColor,
-                    )),
-              ))
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: greenButton,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(buttonRadius),
+                      ),
+                    ),
+                    child: const Text('Nein',
+                        style: TextStyle(
+                          color: textColor,
+                        )),
+                  ))
             ]),
           ],
         );
       },
     );
   }
-
-  Future<void> showMyEditDialog(
-      String markerTitle, String markerAdditionalInformation) async {
+  Future<void> showMyEditDialog(String markerTitle,
+      String markerAdditionalInformation) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     TextEditingController nameController = TextEditingController();
     TextEditingController additionalInfoController = TextEditingController();
@@ -127,7 +173,8 @@ class DialogHelper {
                           hintText: 'Gib zusätzliche Informationen ein',
                           labelText: 'Zusätzliche Informationen:'),
                       minLines:
-                          1, // any number you need (It works as the rows for the textarea)
+                      1,
+                      // any number you need (It works as the rows for the textarea)
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                     ),
@@ -140,43 +187,44 @@ class DialogHelper {
               Row(children: <Widget>[
                 Expanded(
                     child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: redButton,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          buttonRadius), // Eckenradius anpassen
-                    ),
-                  ),
-                  child: const Text('Abbrechen',
-                      style: TextStyle(
-                        color: textColor,
-                      )),
-                )),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: redButton,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              buttonRadius), // Eckenradius anpassen
+                        ),
+                      ),
+                      child: const Text('Abbrechen',
+                          style: TextStyle(
+                            color: textColor,
+                          )),
+                    )),
                 const SizedBox(width: 11),
                 Expanded(
                     child: ElevatedButton(
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      changeCustomMarkerDialogHelper(point, nameController.text,
-                          additionalInfoController.text);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: greenButton,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          buttonRadius), // Eckenradius anpassen
-                    ),
-                  ),
-                  child: const Text('Übernehmen',
-                      style: TextStyle(
-                        color: textColor,
-                      )),
-                ))
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          changeCustomMarkerDialogHelper(
+                              point, nameController.text,
+                              additionalInfoController.text);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: greenButton,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              buttonRadius), // Eckenradius anpassen
+                        ),
+                      ),
+                      child: const Text('Übernehmen',
+                          style: TextStyle(
+                            color: textColor,
+                          )),
+                    ))
               ]),
               const Divider(height: 20, color: Colors.grey, thickness: 1),
               Row(
@@ -184,26 +232,26 @@ class DialogHelper {
                   children: <Widget>[
                     Expanded(
                         child: ElevatedButton(
-                      onPressed: () async {
-                        bool? deleteConfirmed =
+                          onPressed: () async {
+                            bool? deleteConfirmed =
                             await showDeleteConfirmationDialog(context);
-                        if (deleteConfirmed != null && deleteConfirmed) {
-                          removeCustomMarkerDialogHelper(point);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: blackButton,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              buttonRadius), // Eckenradius anpassen
-                        ),
-                      ),
-                      child: const Text('Löschen',
-                          style: TextStyle(
-                            color: textColor,
-                          )),
-                    ))
+                            if (deleteConfirmed != null && deleteConfirmed) {
+                              removeCustomMarkerDialogHelper(point);
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: blackButton,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  buttonRadius), // Eckenradius anpassen
+                            ),
+                          ),
+                          child: const Text('Löschen',
+                              style: TextStyle(
+                                color: textColor,
+                              )),
+                        ))
                   ])
             ],
           );
@@ -252,7 +300,8 @@ class DialogHelper {
                         hintText: 'Gib zusätzliche Informationen ein',
                         labelText: 'Zusätzliche Informationen:'),
                     minLines:
-                        1, // any number you need (It works as the rows for the textarea)
+                    1,
+                    // any number you need (It works as the rows for the textarea)
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                   ),
@@ -265,45 +314,47 @@ class DialogHelper {
             Row(children: <Widget>[
               Expanded(
                   child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: redButton,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(buttonRadius),
-                  ),
-                ),
-                child: const Text('Abbrechen',
-                    style: TextStyle(
-                      color: textColor,
-                    )),
-              )),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: redButton,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(buttonRadius),
+                      ),
+                    ),
+                    child: const Text('Abbrechen',
+                        style: TextStyle(
+                          color: textColor,
+                        )),
+                  )),
               const SizedBox(width: 11),
               Expanded(
                   child: ElevatedButton(
-                onPressed: () {
-                  if (formKey.currentState!.validate()) {
-                    addPinWithLabelDialogHelper(point, nameController.text,
-                        additionalInfoController.text);
-                    Navigator.of(context).pop();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: greenButton,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(buttonRadius),
-                  ),
-                ),
-                child: const Text('Erstellen',
-                    style: TextStyle(
-                      color: textColor,
-                    )),
-              ))
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        addPinWithLabelDialogHelper(point, nameController.text,
+                            additionalInfoController.text);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: greenButton,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(buttonRadius),
+                      ),
+                    ),
+                    child: const Text('Erstellen',
+                        style: TextStyle(
+                          color: textColor,
+                        )),
+                  ))
             ])
           ],
         );
       },
     );
   }
+
+ */
 }

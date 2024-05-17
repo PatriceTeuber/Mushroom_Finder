@@ -2,17 +2,19 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:mushroom_finder/markerpopup.dart';
 import 'package:mushroom_finder/pointdata/pointdata.dart';
 import 'appbar.dart';
 import 'actionbutton.dart';
 import 'database/app_database.dart';
 import 'database/pointDataModel.dart';
-import 'dialoghelper.dart';
+import 'dialoghelper/dialoghelper.dart';
 
 void main() {
-  /// Ausführen der App
   runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
       home: MyApp()));
 }
 
@@ -35,6 +37,8 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   static const _inProgressId = 'AnimatedMapController#MoveInProgress';
   static const _finishedId = 'AnimatedMapController#MoveFinished';
 
+  /// Methode für die Animationsbewegung der Karte
+  /// Bspw. wenn nach bestimmten Pilz gesucht wird
   void _animatedMapMove(LatLng destLocation, double destZoom) {
     // Create some tweens. These serve to split up the transition from one location to another.
     // In our case, we want to split the transition be<tween> our current map center and the destination.
@@ -182,7 +186,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
                       addPinWithLabelDialogHelper: addCustomMarker,
                       removeCustomMarkerDialogHelper: removeCustomMarker,
                       changeCustomMarkerDialogHelper: changeCustomMarker)
-                  .showMyCreationDialog();
+                  .showCreationDialog();
             });
           },
         ),
@@ -192,9 +196,23 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
             userAgentPackageName: 'com.example.app',
             tileProvider: CancellableNetworkTileProvider(),
           ),
-          buildMarkerLayer(),
           buildLabelLayer(),
-        ],
+          PopupMarkerLayer(
+            options: PopupMarkerLayerOptions(
+              markers: pointDataList.map((pointData) => pointData.pinMarker).toList(),
+              popupDisplayOptions: PopupDisplayOptions(
+                builder: (BuildContext context, Marker marker) =>
+                    MarkerPopUp(
+                        context: context,
+                        marker,
+                        removeCustomMarkerMarkerPopUp: removeCustomMarker,
+                        changeCustomMarkerMarkerPopUp: changeCustomMarker,
+                    ),
+              ),
+            ),
+          ),
+          //buildMarkerLayer(),
+                  ],
       ),
       floatingActionButton: FloatingActionbutton(mapController: mapController),
     );
@@ -308,12 +326,12 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   }
 
   /// Erstellen von Pins auf der Karte
-  Marker buildPin(LatLng point,[Color PinColor = Colors.black]) => Marker(
+  Marker buildPin(LatLng point,[Color pinColor = Colors.black]) => Marker(
         point: point,
         width: 60,
         height: 60,
         alignment: Alignment.topCenter,
-        child: IconButton(
+        child: /*IconButton(
           onPressed: () {
             setState(() {
               PointData? pointData = findPointData(point);
@@ -324,7 +342,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
                         addPinWithLabelDialogHelper: addCustomMarker,
                         removeCustomMarkerDialogHelper: removeCustomMarker,
                         changeCustomMarkerDialogHelper: changeCustomMarker)
-                    .showMyEditDialog(
+                    .showEditDialog(
                     pointData.title, pointData.additionalInformation);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -335,9 +353,10 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
             });
           },
           icon: const Icon(Icons.location_on),
-          color: PinColor,
+          color: pinColor,
           iconSize: 50,
-        ),
+        ),*/
+        Icon(Icons.location_on, size: 50, color: pinColor)
       );
 
   /// Erstellen von Text auf der Karte
@@ -353,14 +372,11 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
       textAlign: TextAlign.center,
     );
     textPainter.layout();
-
     return Marker(
       point: point,
       width: textPainter.width + 16,
-
       /// Breite des Containers entspricht der Breite des Textes plus Padding
       height: textPainter.height + 12,
-
       /// Höhe des Containers entspricht der Höhe des Textes plus Padding
       alignment: Alignment.bottomCenter,
       child: Container(
