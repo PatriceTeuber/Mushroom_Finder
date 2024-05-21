@@ -23,7 +23,8 @@ class DeleteConfirmationDialog extends StatelessWidget {
           Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  onConfirmed();
+                  Navigator.of(context).pop(true);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: DialogHelper.redButton,
@@ -40,7 +41,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
           Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(false);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: DialogHelper.greenButton,

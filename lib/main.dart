@@ -204,7 +204,8 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
                 builder: (BuildContext context, Marker marker) =>
                     MarkerPopUp(
                         context: context,
-                        marker,
+                        pointData: findPointData(marker.point),
+                        addPinWithLabelMarkerPopUp: addCustomMarker,
                         removeCustomMarkerMarkerPopUp: removeCustomMarker,
                         changeCustomMarkerMarkerPopUp: changeCustomMarker,
                     ),

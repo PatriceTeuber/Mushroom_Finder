@@ -32,17 +32,18 @@ class DialogHelper {
   static const double buttonRadius = 5;
 
   /// Dialoge anzeigen
-  void showDeleteConfirmationDialog() {
-    showDialog(
+  Future<bool?> showDeleteConfirmationDialog() async {
+    bool? result = await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) =>
           DeleteConfirmationDialog(
             onConfirmed: () {
-              removeCustomMarkerDialogHelper(point);
+              //removeCustomMarkerDialogHelper(point);
             },
           ),
     );
+    return result;
   }
 
   void showEditDialog(String markerTitle, String markerAdditionalInformation) {
