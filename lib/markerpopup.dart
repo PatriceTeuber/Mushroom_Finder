@@ -25,11 +25,19 @@ class MarkerPopUp extends StatefulWidget {
   State<StatefulWidget> createState() => _MarkerPopUpState();
 }
 
-class _MarkerPopUpState extends State<MarkerPopUp> {
+class _MarkerPopUpState extends State<MarkerPopUp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final pointData = widget.pointData;
+
+    /// Falls der Punkt nicht existiert wird ein leeres Widget zurückgegeben
+    if (pointData == null) {
+      return const SizedBox.shrink();
+    }
+
     return Card(
+      elevation: 4.0,
       child: InkWell(
         onTap: () => setState(() {}),
         child: Row(
@@ -42,31 +50,28 @@ class _MarkerPopUpState extends State<MarkerPopUp> {
                 onPressed: () {
                   DialogHelper(
                       context: context,
-                      point: widget.pointData!.pinMarker.point,
+                      point: pointData.pinMarker.point,
                       addPinWithLabelDialogHelper: widget.addPinWithLabelMarkerPopUp,
                       removeCustomMarkerDialogHelper: widget.removeCustomMarkerMarkerPopUp,
                       changeCustomMarkerDialogHelper: widget.changeCustomMarkerMarkerPopUp)
                       .showEditDialog(
-                      widget.pointData!.title, widget.pointData!.additionalInformation);
+                      pointData.title, pointData.additionalInformation);
                 },
               ),
             ),
-            _cardDescription(context),
+            _cardDescription(context, pointData),
             Padding(
               padding: const EdgeInsets.only(left: 10, right: 10),
               child: IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () async {
-                    bool? deleteConfirmed = await DialogHelper(
+                onPressed: () {
+                    DialogHelper(
                         context: context,
-                        point: widget.pointData!.pinMarker.point,
+                        point: pointData.pinMarker.point,
                         addPinWithLabelDialogHelper: widget.addPinWithLabelMarkerPopUp,
                         removeCustomMarkerDialogHelper: widget.removeCustomMarkerMarkerPopUp,
                         changeCustomMarkerDialogHelper: widget.changeCustomMarkerMarkerPopUp)
                         .showDeleteConfirmationDialog();
-                    if (deleteConfirmed == true) {
-                      ///Schließen des MarkerPopUps
-                    }
                 },
               ),
             ),
@@ -76,7 +81,7 @@ class _MarkerPopUpState extends State<MarkerPopUp> {
     );
   }
 
-  Widget _cardDescription(BuildContext context) {
+  Widget _cardDescription(BuildContext context, PointData pointData) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
@@ -87,7 +92,7 @@ class _MarkerPopUpState extends State<MarkerPopUp> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              'Pilz-Spot "${widget.pointData!.title}"',
+              'Pilz-Spot "${pointData.title}"',
               overflow: TextOverflow.fade,
               softWrap: false,
               style: const TextStyle(
@@ -95,19 +100,39 @@ class _MarkerPopUpState extends State<MarkerPopUp> {
                 fontSize: 14.0,
               ),
             ),
+            const Divider(height: 20, color: Colors.grey, thickness: 1.5),
             const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-            Text(
-              'Zusätzliche Informationen: ${widget.pointData!.additionalInformation}',
-              style: const TextStyle(fontSize: 12.0),
+            const Text(
+              'Zusätzliche Informationen:',
+              style: TextStyle(fontSize: 12.0),
+            ),
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: 100,
+                    minWidth: constraints.maxWidth, // Use the current width of the container
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      pointData.additionalInformation,
+                      style: const TextStyle(fontSize: 12.0),
+                    ),
+                  ),
+                );
+              },
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
+            const Divider(height: 20, color: Colors.grey, thickness: 1.5),
             Text(
-              'Position: ${widget.pointData!.pinMarker.point.latitude}, ${widget.pointData!.pinMarker.point.longitude}',
+              'Position: ${pointData.pinMarker.point.latitude}, ${pointData.pinMarker.point.longitude}',
               style: const TextStyle(fontSize: 12.0),
-            )
+            ),
           ],
         ),
       ),
     );
   }
+
+
 }

@@ -14,6 +14,7 @@ import 'dialoghelper/dialoghelper.dart';
 
 void main() {
   runApp(const MaterialApp(
+    title: 'MushMap',
     debugShowCheckedModeBanner: false,
       home: MyApp()));
 }
@@ -171,6 +172,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: Appbar(getCustomMarker: getCustomMarker,CreateSearch:createSearch, DeleteSearch:deleteSearch),
       body: FlutterMap(
