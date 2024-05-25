@@ -51,7 +51,7 @@ class PoisonousInfoDialog extends StatelessWidget {
               'Tel. (05 51) 1 92 40'
             ]),
             const SizedBox(height: 20),
-            _buildInfoSection('Hamburg', [
+            _buildInfoSection('Homburg', [
               'Informations- und Beratungszentrum für Vergiftungsfälle',
               'Tel. (0 68 41) 1 92 40'
             ]),
