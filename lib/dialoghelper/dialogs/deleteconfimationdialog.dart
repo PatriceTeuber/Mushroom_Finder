@@ -20,6 +20,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(5.0))),
       actions: <Widget>[
         Row(children: <Widget>[
+          /// Ja-Button
           Expanded(
               child: ElevatedButton(
                 onPressed: () {
@@ -38,6 +39,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
                     )),
               )),
           const SizedBox(width: 11),
+          /// Nein-Button
           Expanded(
               child: ElevatedButton(
                 onPressed: () {

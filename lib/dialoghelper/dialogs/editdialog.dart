@@ -19,13 +19,19 @@ class EditDialog extends StatefulWidget {
 }
 
 class _EditDialogState extends State<EditDialog> {
+  /// Key zum Initialisieren der Form
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  /// Controler, um die Informationen des Namen-Inputfelds abrufen zu können
   late TextEditingController _nameController;
+  /// Controler, um die Informationen des zusätzliche Informationen-Inputfelds
+  /// abrufen zu können
   late TextEditingController _additionalInfoController;
 
   @override
   void initState() {
     super.initState();
+    /// Controler Initialisieren mit bereits vorhandenen Werten
+    /// Dadurch werden Inputfelder direkt mit diesen Werten gefüllt
     _nameController = TextEditingController(text: widget.markerTitle);
     _additionalInfoController =
         TextEditingController(text: widget.markerAdditionalInformation);
@@ -54,12 +60,14 @@ class _EditDialogState extends State<EditDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            /// Inputfield für Name
             TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
                     icon: Icon(Icons.bookmark),
                     hintText: 'Bitte gib den Namen des Markers ein',
                     labelText: 'Name *'),
+                /// validator -> Name muss vorhanden sein
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return 'Bitte gebe einen Namen ein';
@@ -67,6 +75,7 @@ class _EditDialogState extends State<EditDialog> {
                   return null;
                 }),
             const SizedBox(height: 20),
+            /// Inputfield für zusätzliche Informationen
             TextFormField(
               controller: _additionalInfoController,
               decoration: const InputDecoration(

@@ -48,6 +48,7 @@ class _MarkerPopUpState extends State<MarkerPopUp> with SingleTickerProviderStat
               child: IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
+                  /// Editierdialogfenster wird aufgerufen
                   DialogHelper(
                       context: context,
                       point: pointData.pinMarker.point,
@@ -65,6 +66,7 @@ class _MarkerPopUpState extends State<MarkerPopUp> with SingleTickerProviderStat
               child: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () {
+                    /// Dialogfenster zur Löschbestätigung wird aufgerufen
                     DialogHelper(
                         context: context,
                         point: pointData.pinMarker.point,
@@ -81,6 +83,8 @@ class _MarkerPopUpState extends State<MarkerPopUp> with SingleTickerProviderStat
     );
   }
 
+  /// Mittlerer Teil der Card, welcher alle Inhalte, wie den Namen,
+  /// zusätzliche Informationen und die genaue Position darstellt
   Widget _cardDescription(BuildContext context, PointData pointData) {
     return Padding(
       padding: const EdgeInsets.all(10),
@@ -91,6 +95,7 @@ class _MarkerPopUpState extends State<MarkerPopUp> with SingleTickerProviderStat
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            /// Marker-Titel
             Text(
               'Pilz-Spot "${pointData.title}"',
               overflow: TextOverflow.fade,
@@ -102,6 +107,7 @@ class _MarkerPopUpState extends State<MarkerPopUp> with SingleTickerProviderStat
             ),
             const Divider(height: 20, color: Colors.grey, thickness: 1.5),
             const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+            /// Zusätzliche Informationen
             const Text(
               'Zusätzliche Informationen:',
               style: TextStyle(fontSize: 12.0),
@@ -124,6 +130,7 @@ class _MarkerPopUpState extends State<MarkerPopUp> with SingleTickerProviderStat
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             const Divider(height: 20, color: Colors.grey, thickness: 1.5),
+            /// genaue Positions-Informationen
             Text(
               'Position: ${pointData.pinMarker.point.latitude}, ${pointData.pinMarker.point.longitude}',
               style: const TextStyle(fontSize: 12.0),
