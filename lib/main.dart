@@ -1,4 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
@@ -14,13 +13,11 @@ import 'dialoghelper/dialoghelper.dart';
 
 void main() {
   runApp(const MaterialApp(
-    title: 'MushMap',
-    debugShowCheckedModeBanner: false,
-      home: MyApp()));
+      title: 'MushMap', debugShowCheckedModeBanner: false, home: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -29,157 +26,42 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   final MapController mapController = MapController();
   late var pointDataList = <PointData>[];
-  final List<String> TitelstoSearch = [];
+  final List<String> titlesToSearch = [];
 
-  bool _hasConnection = true;
-
-  /// Animation Konstante
+  /// Animation Konstanten
   static const _startedId = 'AnimatedMapController#MoveStarted';
   static const _inProgressId = 'AnimatedMapController#MoveInProgress';
   static const _finishedId = 'AnimatedMapController#MoveFinished';
 
-  /// Methode für die Animationsbewegung der Karte
-  /// Bspw. wenn nach bestimmten Pilz gesucht wird
-  void _animatedMapMove(LatLng destLocation, double destZoom) {
-    // Create some tweens. These serve to split up the transition from one location to another.
-    // In our case, we want to split the transition be<tween> our current map center and the destination.
-    final camera = mapController.camera;
-    final latTween = Tween<double>(
-        begin: camera.center.latitude, end: destLocation.latitude);
-    final lngTween = Tween<double>(
-        begin: camera.center.longitude, end: destLocation.longitude);
-    final zoomTween = Tween<double>(begin: camera.zoom, end: destZoom);
-
-    // Create a animation controller that has a duration and a TickerProvider.
-    final controller = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
-    // The animation determines what path the animation will take. You can try different Curves values, although I found
-    // fastOutSlowIn to be my favorite.
-    final Animation<double> animation =
-    CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
-
-    // Note this method of encoding the target destination is a workaround.
-    // When proper animated movement is supported (see #1263) we should be able
-    // to detect an appropriate animated movement event which contains the
-    // target zoom/center.
-    final startIdWithTarget =
-        '$_startedId#${destLocation.latitude},${destLocation.longitude},$destZoom';
-    bool hasTriggeredMove = false;
-
-    controller.addListener(() {
-      final String id;
-      if (animation.value == 1.0) {
-        id = _finishedId;
-      } else if (!hasTriggeredMove) {
-        id = startIdWithTarget;
-      } else {
-        id = _inProgressId;
-      }
-
-      hasTriggeredMove |= mapController.move(
-        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
-        zoomTween.evaluate(animation),
-        id: id,
-      );
-    });
-
-    animation.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        controller.dispose();
-      } else if (status == AnimationStatus.dismissed) {
-        controller.dispose();
-      }
-    });
-
-    controller.forward();
-  }
-
   @override
   void initState() {
     super.initState();
+    /// Laden aller bereits gesetzer Marker-Informationen aus der Datenbank
+    /// und Erstellen neuer Point-Marker Objekte in pointDataList
     loadPointData();
   }
 
   @override
   void dispose() {
     super.dispose();
-
     /// Schließen der Datenbank, wenn die App beendet wird
     AppDatabase.instance.close();
-  }
-
-  Future<void> checkConnection() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    setState(() {
-      _hasConnection = connectivityResult != ConnectivityResult.none;
-    });
-  }
-
-  Future<void> loadPointData() async {
-    final pointDataModels =
-        await AppDatabase.instance.readAllPointDataModels();
-    setState(() {
-      pointDataList = pointDataModels.map((model) {
-        final color = TitelstoSearch.contains(model!.title) ? Colors.green : Colors.black;
-        final pinMarker = model != null
-            ? buildPin(LatLng(model.latitude, model.longitude),color)
-            : null;
-        final labelMarker = model != null
-            ? buildLabel(LatLng(model.latitude, model.longitude), model.title)
-            : null;
-        final additionalInformation =
-            model != null ? model.additionalInformation : "";
-        return PointData(
-            pinMarker!, labelMarker!, model!.title, additionalInformation!);
-      }).toList();
-    });
-  }
-  List<PointData> getCustomMarker() {
-      return pointDataList;
-    }
-
-  void createSearch(String title) {
-    TitelstoSearch.add(title);
-    loadPointData();
-    List<PointData> filteredPointDataList = [];
-    for (PointData pointData in pointDataList) {
-      if (pointData.title == title) {
-        filteredPointDataList.add(pointData);
-      }
-    }
-    if (filteredPointDataList.isEmpty) {
-      /// Fehlerzustand
-    } else if (filteredPointDataList.length > 1) { /// Mehrere Marker mit selben Namen vorhanden
-      var PointEntries = <LatLng>[];
-      for (PointData pointData in filteredPointDataList) {
-        PointEntries.add(pointData.pinMarker.point);
-      }
-      final bounds = LatLngBounds.fromPoints(PointEntries);
-      final constrained = CameraFit.bounds(
-        bounds: bounds,
-      ).fit(mapController.camera);
-      _animatedMapMove(constrained.center, constrained.zoom -1);
-    } else { /// nur ein Marker mit dem selben Namen vorhanden
-      _animatedMapMove(filteredPointDataList.first.pinMarker.point, mapController.camera.zoom + 1);
-    }
-  }
-
-  void deleteSearch() {
-    TitelstoSearch.clear();
-    loadPointData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: false, /// Verhindert das Verschieben von Widgets beim Einblenden der Bildschirmtastatur
       extendBodyBehindAppBar: true,
-      appBar: Appbar(getCustomMarker: getCustomMarker,CreateSearch:createSearch, DeleteSearch:deleteSearch),
+      appBar: Appbar(
+          getCustomMarker: getPointDataList,
+          CreateSearch: createSearch,
+          DeleteSearch: deleteSearch),
       body: FlutterMap(
         mapController: mapController,
         options: MapOptions(
-          initialCenter: const LatLng(50.884842, 12.079811),
-          initialZoom: 12,
+          initialCenter: const LatLng(50.884842, 12.079811), /// Initiale Kartenzentrierung
+          initialZoom: 12, /// Initialer Zoomlevel
           onTap: (tapPosition, latLng) {
             setState(() {
               DialogHelper(
@@ -201,37 +83,150 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
           buildLabelLayer(),
           PopupMarkerLayer(
             options: PopupMarkerLayerOptions(
-              markers: pointDataList.map((pointData) => pointData.pinMarker).toList(),
+              markers: pointDataList
+                  .map((pointData) => pointData.pinMarker)
+                  .toList(),
               popupDisplayOptions: PopupDisplayOptions(
-                builder: (BuildContext context, Marker marker) =>
-                    MarkerPopUp(
-                        context: context,
-                        pointData: findPointData(marker.point),
-                        addPinWithLabelMarkerPopUp: addCustomMarker,
-                        removeCustomMarkerMarkerPopUp: removeCustomMarker,
-                        changeCustomMarkerMarkerPopUp: changeCustomMarker,
-                    ),
+                builder: (BuildContext context, Marker marker) => MarkerPopUp(
+                  context: context,
+                  pointData: findPointData(marker.point), /// Findet die Punktedaten für den Marker
+                  addPinWithLabelMarkerPopUp: addCustomMarker,
+                  removeCustomMarkerMarkerPopUp: removeCustomMarker,
+                  changeCustomMarkerMarkerPopUp: changeCustomMarker,
+                ),
               ),
             ),
           ),
-          //buildMarkerLayer(),
-                  ],
+        ],
       ),
       floatingActionButton: FloatingActionbutton(mapController: mapController),
     );
   }
 
+  /// Laden aller bereits bestehenden Datenbankeinträge von Pilz-Markern
+  /// Mit jedem Datensatz wird ein neues PointData-Objekt erstellt, welches
+  /// alle Informationen, sowie den Pin und das Label der Markers enthält
+  Future<void> loadPointData() async {
+    final pointDataModels = await AppDatabase.instance.readAllPointDataModels();
+    setState(() {
+      pointDataList = pointDataModels.map((model) {
+        final color =
+        titlesToSearch.contains(model!.title) ? Colors.green : Colors.black;
+        final pinMarker =
+        buildPin(LatLng(model.latitude, model.longitude), color);
+        final labelMarker =
+        buildLabel(LatLng(model.latitude, model.longitude), model.title);
+        final additionalInformation = model.additionalInformation!.isNotEmpty
+            ? model.additionalInformation
+            : "";
+        return PointData(
+            pinMarker, labelMarker, model.title, additionalInformation!);
+      }).toList();
+    });
+  }
+
+  List<PointData> getPointDataList() {
+    return pointDataList;
+  }
+
+  void createSearch(String title) {
+    titlesToSearch.add(title);
+    loadPointData();
+    List<PointData> filteredPointDataList = [];
+    for (PointData pointData in pointDataList) {
+      if (pointData.title == title) {
+        filteredPointDataList.add(pointData);
+      }
+    }
+    if (filteredPointDataList.isEmpty) {
+      /// Fehlerzustand
+    } else if (filteredPointDataList.length > 1) {
+      /// Mehrere Marker mit selben Namen vorhanden
+      var pointEntries = <LatLng>[];
+      for (PointData pointData in filteredPointDataList) {
+        pointEntries.add(pointData.pinMarker.point);
+      }
+      final bounds = LatLngBounds.fromPoints(pointEntries);
+      final constrained = CameraFit.bounds(
+        bounds: bounds,
+      ).fit(mapController.camera);
+      _animatedMapMove(constrained.center, constrained.zoom - 1);
+    } else {
+      /// nur ein Marker mit dem selben Namen vorhanden
+      _animatedMapMove(filteredPointDataList.first.pinMarker.point,
+          mapController.camera.zoom + 1);
+    }
+  }
+
+  void deleteSearch() {
+    titlesToSearch.clear();
+    loadPointData();
+  }
+
+  /// Methode für die Animationsbewegung der Karte
+  /// Bspw. wenn nach bestimmten Pilz gesucht wird
+  void _animatedMapMove(LatLng destLocation, double destZoom) {
+    /// Erstellen einiger Tweens. Diese dienen dazu, den Übergang von einem Standort zum anderen aufzuteilen.
+    /// In unserem Fall möchten wir den Übergang zwischen unserem aktuellen Kartenmittelpunkt und dem Ziel aufteilen.
+    final camera = mapController.camera;
+    final latTween = Tween<double>(
+        begin: camera.center.latitude, end: destLocation.latitude);
+    final lngTween = Tween<double>(
+        begin: camera.center.longitude, end: destLocation.longitude);
+    final zoomTween = Tween<double>(begin: camera.zoom, end: destZoom);
+
+    /// Erstellen eines Animationscontroller mit einer Dauer und einem TickerProvider.
+    final controller = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    /// Die Animation bestimmt den Pfad der Animation.
+    final Animation<double> animation =
+    CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+    /// Diese Methode zur Codierung des Zielortes ist ein Workaround.
+    final startIdWithTarget =
+        '$_startedId#${destLocation.latitude},${destLocation.longitude},$destZoom';
+    bool hasTriggeredMove = false;
+
+    /// Event-Listener zum Kontroler hinzufügen, um die passende Animations Status-Id zuzuweisen
+    controller.addListener(() {
+      final String id;
+      if (animation.value == 1.0) {
+        id = _finishedId;
+      } else if (!hasTriggeredMove) {
+        id = startIdWithTarget;
+      } else {
+        id = _inProgressId;
+      }
+
+      hasTriggeredMove |= mapController.move(
+        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+        zoomTween.evaluate(animation),
+        id: id,
+      );
+    });
+
+    /// Entfernen des Controllers, wenn dieser nicht mehr gebraucht wird
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        controller.dispose();
+      } else if (status == AnimationStatus.dismissed) {
+        controller.dispose();
+      }
+    });
+
+    controller.forward();
+  }
+
   /// Zusammenfassen aller Pin-Marker aus PointData-Objekten in einem MarkerLayer
   Widget buildMarkerLayer() {
     final markers =
-    pointDataList.map((pointData) => pointData.pinMarker).toList();
+        pointDataList.map((pointData) => pointData.pinMarker).toList();
     return MarkerLayer(markers: markers);
   }
 
   /// Zusammenfassen aller Label-Marker aus PointData-Objekten in einem MarkerLayer
   Widget buildLabelLayer() {
     final markers =
-    pointDataList.map((pointData) => pointData.labelMarker).toList();
+        pointDataList.map((pointData) => pointData.labelMarker).toList();
     return MarkerLayer(markers: markers);
   }
 
@@ -275,8 +270,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
         );
 
         /// Aktualisieren der PointDataModel-Instanz in der Datenbank
-        await AppDatabase.instance
-            .updatePointDataModel(updatedPointDataModel);
+        await AppDatabase.instance.updatePointDataModel(updatedPointDataModel);
 
         /// Neuladen aller Markerdaten, um die Anzeige auf der Karte zu aktualisieren
         loadPointData();
@@ -296,6 +290,8 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
     }
   }
 
+  /// Entfernen eines bestehenden Markers aus der Datenbank
+  /// Aktualisierung des Screens ohne den gelöschten Marker
   void removeCustomMarker(LatLng point) async {
     /// Versuche, die PointDataModel-Instanz für die angegebenen Koordinaten zu lesen
     final existingPointDataModel = await AppDatabase.instance
@@ -328,39 +324,13 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
     return null;
   }
 
-  /// Erstellen von Pins auf der Karte
-  Marker buildPin(LatLng point,[Color pinColor = Colors.black]) => Marker(
-        point: point,
-        width: 60,
-        height: 60,
-        alignment: Alignment.topCenter,
-        child: /*IconButton(
-          onPressed: () {
-            setState(() {
-              PointData? pointData = findPointData(point);
-              if (pointData != null) {
-                DialogHelper(
-                        context: context,
-                        point: point,
-                        addPinWithLabelDialogHelper: addCustomMarker,
-                        removeCustomMarkerDialogHelper: removeCustomMarker,
-                        changeCustomMarkerDialogHelper: changeCustomMarker)
-                    .showEditDialog(
-                    pointData.title, pointData.additionalInformation);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Marker-Datensatz wurde nicht gefunden.')),
-                );
-              }
-            });
-          },
-          icon: const Icon(Icons.location_on),
-          color: pinColor,
-          iconSize: 50,
-        ),*/
-        Icon(Icons.location_on, size: 50, color: pinColor)
-      );
+  /// Erstellen eines Pins auf der Karte
+  Marker buildPin(LatLng point, [Color pinColor = Colors.black]) => Marker(
+      point: point,
+      width: 60,
+      height: 60,
+      alignment: Alignment.topCenter,
+      child: Icon(Icons.location_on, size: 50, color: pinColor));
 
   /// Erstellen von Text auf der Karte
   Marker buildLabel(LatLng point, String markerName) {
@@ -377,10 +347,10 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
     textPainter.layout();
     return Marker(
       point: point,
-      width: textPainter.width + 16,
       /// Breite des Containers entspricht der Breite des Textes plus Padding
-      height: textPainter.height + 12,
+      width: textPainter.width + 16,
       /// Höhe des Containers entspricht der Höhe des Textes plus Padding
+      height: textPainter.height + 12,
       alignment: Alignment.bottomCenter,
       child: Container(
         padding: const EdgeInsets.all(4),
