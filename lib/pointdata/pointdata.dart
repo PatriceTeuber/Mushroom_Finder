@@ -9,3 +9,4 @@ class PointData {
   PointData(this.pinMarker, this.labelMarker, this.title,
       this.additionalInformation);
 }
+

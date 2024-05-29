@@ -51,7 +51,7 @@ class AppDatabase {
 
   Future<List<PointDataModel?>> readAllPointDataModels() async {
     final db = await instance.database;
-    final result = await db.query(tableName); //Eventuell OrderBY hinzufügen
+    final result = await db.query(tableName);
     return result.map((json) => PointDataModel.fromJson(json)).toList();
   }
 
